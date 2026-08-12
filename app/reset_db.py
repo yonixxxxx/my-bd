@@ -10,5 +10,6 @@ async def reset_database():
         await conn.run_sync(Base.metadata.create_all)
         print("Таблицы созданы заново")
 
+
 if __name__ == "__main__":
     asyncio.run(reset_database())
