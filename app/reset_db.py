@@ -2,6 +2,7 @@ import asyncio
 from app.db.config import engine, Base
 from app.account import models
 
+
 async def reset_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
