@@ -1,0 +1,31 @@
+pip install "fastapi[standard]" sqlalchemy[asyncio] asyncpg alembic python-decouple python-jose[cryptography] passlib[bcrypt] cryptography
+
+pip install "fastapi[standard]"
+
+pip install "sqlalchemy[asyncio]"
+
+pip install asyncpg
+
+pip install alembic
+
+pip install python-decouple
+
+pip install "python-jose[cryptography]"
+
+pip install "passlib[bcrypt]"
+
+pip install cryptography
+
+
+
+
+pip freeze > requirements.txt
+
+fastapi dev
+
+
+
+
+
+
+
