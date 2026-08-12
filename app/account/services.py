@@ -76,7 +76,7 @@ async def deactivate_user(session: AsyncSession, user_id: int) -> User:
     return user
 
 
-# --- Верификация email ---
+
 
 async def send_verification_email(user: User):
     token = create_email_verification_token(user.id)
