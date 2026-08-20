@@ -10,7 +10,10 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
-    username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
+
+
+    username: Mapped[Optional[str]] = mapped_column(String(50), unique=True, nullable=True, index=True)
+
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     full_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -30,7 +33,6 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
-
 
     products: Mapped[list["Product"]] = relationship(
         "Product",

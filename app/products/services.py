@@ -12,13 +12,16 @@ async def create_product(
     product_data: ProductCreate,
     user_id: int
 ) -> Product:
+
     new_product = Product(
         name=product_data.name,
         description=product_data.description,
         price=product_data.price,
-        stock=product_data.stock,
+        stock=0,
         category=product_data.category,
-        image_url=product_data.image_url,
+
+        image_url=str(product_data.image_url) if product_data.image_url else None,
+        location=product_data.location,
         created_by=user_id
     )
     session.add(new_product)
@@ -28,6 +31,7 @@ async def create_product(
 
 
 async def get_product_by_id(session: AsyncSession, product_id: int) -> Product | None:
+
     stmt = select(Product).where(Product.id == product_id)
     result = await session.scalars(stmt)
     return result.first()
@@ -39,6 +43,7 @@ async def get_products(
     skip: int = 0,
     limit: int = 100
 ) -> list[Product]:
+
     stmt = select(Product).where(Product.is_active == True)
 
     if filters:
@@ -49,6 +54,7 @@ async def get_products(
         if filters.max_price:
             stmt = stmt.where(Product.price <= filters.max_price)
         if filters.in_stock:
+
             stmt = stmt.where(Product.stock > 0)
         if filters.search:
             stmt = stmt.where(
@@ -69,12 +75,14 @@ async def update_product(
     product_data: ProductUpdate,
     user_id: int
 ) -> Product:
+
     product = await get_product_by_id(session, product_id)
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Товар не найден"
         )
+
 
     user = await session.get(User, user_id)
     if product.created_by != user_id and not user.is_admin:
@@ -97,6 +105,7 @@ async def delete_product(
     product_id: int,
     user_id: int
 ) -> bool:
+
     product = await get_product_by_id(session, product_id)
     if not product:
         raise HTTPException(
@@ -121,11 +130,12 @@ async def hard_delete_product(
     product_id: int,
     user_id: int
 ) -> bool:
+
     product = await get_product_by_id(session, product_id)
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product not found"
+            detail="Товар не найден"
         )
 
     user = await session.get(User, user_id)
@@ -146,6 +156,7 @@ async def get_products_by_user(
     skip: int = 0,
     limit: int = 100
 ) -> list[Product]:
+
     stmt = select(Product).where(
         Product.created_by == user_id,
         Product.is_active == True

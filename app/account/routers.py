@@ -35,8 +35,8 @@ async def login(session: SessionDep, login_data: UserLogin):
         "access_token": tokens["access_token"],
         "token_type": "bearer"
     })
-    response.set_cookie("access_token", tokens["access_token"], httponly=True, secure=True, samesite="lax", max_age=60*60*24)
-    response.set_cookie("refresh_token", tokens["refresh_token"], httponly=True, secure=True, samesite="lax", max_age=60*60*24*7)
+    response.set_cookie("access_token", tokens["access_token"], httponly=True, secure=False, samesite="lax", max_age=60*60*24)
+    response.set_cookie("refresh_token", tokens["refresh_token"], httponly=True, secure=False, samesite="lax", max_age=60*60*24*7)
     return response
 
 
@@ -70,8 +70,8 @@ async def refresh_token(session: SessionDep, request: Request):
     tokens = await create_tokens(session, user)
 
     response = JSONResponse(content={"message": "Token refreshed"})
-    response.set_cookie("access_token", tokens["access_token"], httponly=True, secure=True, samesite="lax", max_age=60*60*24)
-    response.set_cookie("refresh_token", tokens["refresh_token"], httponly=True, secure=True, samesite="lax", max_age=60*60*24*7)
+    response.set_cookie("access_token", tokens["access_token"], httponly=True, secure=False, samesite="lax", max_age=60*60*24)
+    response.set_cookie("refresh_token", tokens["refresh_token"], httponly=True, secure=False, samesite="lax", max_age=60*60*24*7)
     return response
 
 
@@ -111,7 +111,6 @@ async def send_reset_email(session: SessionDep, data: PasswordResetEmailRequest)
 @router.post("/reset-password")
 async def reset_password_endpoint(session: SessionDep, data: PasswordResetRequest):
     return await reset_password(session, data)
-
 
 
 @router.get("/admin")

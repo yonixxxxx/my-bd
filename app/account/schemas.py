@@ -3,10 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
-
 class UserBase(BaseModel):
     email: EmailStr
-    username: str = Field(..., min_length=3, max_length=50)
     full_name: Optional[str] = None
     is_active: bool = True
     is_admin: bool = False
@@ -28,18 +26,16 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
-    username: Optional[str] = Field(None, min_length=3, max_length=50)
     full_name: Optional[str] = None
     is_active: Optional[bool] = None
 
 
 class UserOut(UserBase):
     id: int
+    username: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
-
-
 
 
 class UserLogin(BaseModel):
@@ -52,12 +48,8 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
-
-
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
-
-
 
 
 class PasswordChangeRequest(BaseModel):

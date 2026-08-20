@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import String, Integer, Float, Boolean, DateTime, ForeignKey, Text
+from sqlalchemy import String, Integer, Float, Boolean, DateTime, ForeignKey, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.config import Base
 
@@ -13,8 +13,14 @@ class Product(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     price: Mapped[float] = mapped_column(Float, nullable=False)
     stock: Mapped[int] = mapped_column(Integer, default=0)
+
+
     category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
     image_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+
+    location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(
@@ -27,3 +33,8 @@ class Product(Base):
     )
 
     user: Mapped["User"] = relationship("User", back_populates="products")
+
+
+    __table_args__ = (
+        Index("ix_products_category_is_active", "category", "is_active"),
+    )

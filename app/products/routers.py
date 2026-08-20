@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import List, Optional
 from sqlalchemy import select
-
 from app.db.config import SessionDep
 from app.products.schemas import (
     ProductCreate, ProductUpdate, ProductOut, ProductFilters
@@ -17,8 +16,6 @@ from app.account.deps import get_current_user, get_current_active_user, require_
 from app.account.models import User
 
 router = APIRouter(prefix="/products", tags=["Products"])
-
-
 
 
 @router.get("/categories", response_model=List[str])
@@ -63,8 +60,6 @@ async def get_product(
     return product
 
 
-
-
 @router.post("/", response_model=ProductOut, status_code=status.HTTP_201_CREATED)
 async def create_new_product(
     session: SessionDep,
@@ -95,8 +90,6 @@ async def delete_existing_product(
 
     await delete_product(session, product_id, current_user.id)
     return None
-
-
 
 
 @router.get("/admin/all", response_model=List[ProductOut])

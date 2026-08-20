@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
+import uuid
 
 from app.account.models import User
 from app.account.schemas import (
@@ -14,15 +15,17 @@ from app.account.utils import (
 )
 
 
-
 async def create_user(session: AsyncSession, user_data: UserCreate) -> User:
+
     if await get_user_by_email(session, user_data.email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    if await get_user_by_username(session, user_data.username):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken")
+
+
+    unique_username = f"user_{uuid.uuid4().hex[:8]}"
+
     new_user = User(
         email=user_data.email,
-        username=user_data.username,
+        username=unique_username,
         full_name=user_data.full_name,
         hashed_password=hash_password(user_data.password)
     )
@@ -40,22 +43,19 @@ async def authenticate_user(session: AsyncSession, login_data: UserLogin) -> Use
 
 
 async def update_user(session: AsyncSession, user_id: int, data: UserUpdate) -> User:
-
     user = await get_user_by_id(session, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     update_data = data.model_dump(exclude_unset=True)
 
+
     if "email" in update_data:
         existing = await get_user_by_email(session, update_data["email"])
         if existing and existing.id != user_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    if "username" in update_data:
-        existing = await get_user_by_username(session, update_data["username"])
-        if existing and existing.id != user_id:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                detail="Имя пользователя уже занято")
+
+
 
     for field, value in update_data.items():
         setattr(user, field, value)
@@ -66,7 +66,6 @@ async def update_user(session: AsyncSession, user_id: int, data: UserUpdate) -> 
 
 
 async def deactivate_user(session: AsyncSession, user_id: int) -> User:
-
     user = await get_user_by_id(session, user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
@@ -74,8 +73,6 @@ async def deactivate_user(session: AsyncSession, user_id: int) -> User:
     await session.commit()
     await session.refresh(user)
     return user
-
-
 
 
 async def send_verification_email(user: User):
@@ -97,6 +94,7 @@ async def verify_email(session: AsyncSession, token: str):
     user.is_verified = True
     await session.commit()
     return {"msg": "Адрес электронной почты успешно подтвержден."}
+
 
 async def change_password(session: AsyncSession, user: User, data: PasswordChangeRequest):
     if not verify_password(data.old_password, user.hashed_password):

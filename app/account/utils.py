@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timedelta, timezone
 from jose import ExpiredSignatureError, JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt  # <--- Импортируем bcrypt напрямую
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,15 +16,14 @@ EMAIL_VERIFICATION_TOKEN_TIME_HOUR = 24
 EMAIL_PASSWORD_RESET_TOKEN_TIME_HOUR = 1
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+# Убрали pwd_context, используем bcrypt напрямую
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
@@ -44,7 +43,6 @@ def decode_token(token: str) -> dict | None:
 
 
 async def create_tokens(session: AsyncSession, user: User) -> dict:
-
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token_str = str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_TOKEN_TIME_DAY)
